@@ -46,17 +46,19 @@ app = FastAPI(
 # Добавляем CORS для взаимодействия с фронтендом
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=["http://localhost:5173"],
+    allow_origins=["*"],
     allow_credentials=True,
     allow_methods=["*"],  # Разрешаем все методы (GET, POST и др.)
     allow_headers=["*"],  # Разрешаем все заголовки
 )
+
 
 # Запуск Telegram-бота в отдельном потоке
 def start_telegram_bot():
     bot_thread = threading.Thread(target=run_bot)
     bot_thread.daemon = True
     bot_thread.start()
+
 
 # WebSocket для чата
 @app.websocket("/ws/chat/{username}")
@@ -101,7 +103,7 @@ async def websocket_endpoint(websocket: WebSocket, username: str, db: Session = 
             await redis.expire(f"chat:{user.id}:messages", 86400)
 
             # Отправляем уведомление через Telegram-бота
-            await send_notification(chat_id=905147427, message=f"User {username} sent a message: {data}")
+            await send_notification(message=f"User {username} sent a message: {data}")
 
             # Разослать новое сообщение всем подключённым пользователям
             await manager.broadcast(f"{username}: {data}")
@@ -149,6 +151,7 @@ async def send_message(message: schemas.MessageCreate, db: Session = Depends(get
     if message.sender_id != current_user.id:
         raise HTTPException(status_code=403, detail="Not authorized to send this message")
     return crud.create_message(db=db, message=message)
+
 
 # Эндпоинт для получения истории сообщений между пользователями
 @app.get("/messages/{user_id}", response_model=list[schemas.Message])

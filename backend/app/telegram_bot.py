@@ -6,7 +6,7 @@ import json
 import os
 
 # Токен Telegram-бота
-API_TOKEN = '8107758575:AAE3Y76PQVL1VUJqjEqO2esSxVYlxBH19Tc'
+API_TOKEN = 'токен'
 
 # Инициализация бота с использованием API токена
 bot = Bot(token=API_TOKEN)
